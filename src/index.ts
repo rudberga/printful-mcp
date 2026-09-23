@@ -9,13 +9,18 @@
  * human sees them first.
  */
 
+import { createRequire } from "node:module";
+
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { get, PrintfulError, scrub } from "./client.js";
 import { redactPii, redactionEnabled } from "./redact.js";
 
-const VERSION = "0.1.0";
+// Read the version from package.json rather than duplicating it here, so the
+// version a client sees can never drift from the version that was published.
+const require = createRequire(import.meta.url);
+const { version: VERSION } = require("../package.json") as { version: string };
 
 const server = new McpServer({ name: "printful-mcp", version: VERSION });
 
@@ -207,7 +212,30 @@ async function main(): Promise<void> {
   await server.connect(transport);
   // stdout is the protocol channel — diagnostics must go to stderr.
   process.stderr.write(`printful-mcp ${VERSION} ready (read-only)\n`);
+
+  // Close the transport on the way out so the client sees a clean disconnect
+  // rather than a dead pipe.
+  let closing = false;
+  const shutdown = async (signal: string): Promise<void> => {
+    if (closing) return;
+    closing = true;
+    process.stderr.write(`printful-mcp shutting down (${signal})\n`);
+    try {
+      await server.close();
+    } catch {
+      // Nothing useful to do if closing fails; we are exiting anyway.
+    }
+    process.exit(0);
+  };
+  process.on("SIGINT", () => void shutdown("SIGINT"));
+  process.on("SIGTERM", () => void shutdown("SIGTERM"));
 }
+
+// A rejection that escapes a tool handler should be logged and survived, not
+// allowed to take down a server that is mid-conversation with a client.
+process.on("unhandledRejection", (reason) => {
+  process.stderr.write(scrub(`printful-mcp unhandled rejection: ${reason}\n`));
+});
 
 main().catch((err) => {
   process.stderr.write(scrub(`printful-mcp failed to start: ${err}\n`));

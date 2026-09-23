@@ -1,19 +1,41 @@
 {
   "name": "printful-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Read-only Model Context Protocol server for the Printful print-on-demand API.",
-  "keywords": ["mcp", "model-context-protocol", "printful", "print-on-demand", "claude"],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "printful",
+    "print-on-demand",
+    "claude"
+  ],
   "license": "MIT",
+  "author": "Alexander Rudberg",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rudberga/printful-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rudberga/printful-mcp/issues"
+  },
+  "homepage": "https://github.com/rudberga/printful-mcp#readme",
   "type": "module",
   "bin": {
     "printful-mcp": "dist/index.js"
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=18"
   },
   "scripts": {
     "build": "tsc && chmod +x dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "smoke": "npm run build && node scripts/smoke.mjs",
     "prepublishOnly": "npm run build",
     "start": "node dist/index.js"
   },

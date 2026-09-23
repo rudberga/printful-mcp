@@ -1,5 +1,9 @@
 # printful-mcp
 
+[![npm](https://img.shields.io/npm/v/printful-mcp)](https://www.npmjs.com/package/printful-mcp)
+[![CI](https://github.com/rudberga/printful-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/rudberga/printful-mcp/actions/workflows/ci.yml)
+[![license](https://img.shields.io/npm/l/printful-mcp)](./LICENSE)
+
 A **read-only** [Model Context Protocol](https://modelcontextprotocol.io) server for the [Printful](https://www.printful.com) print-on-demand API.
 
 Lets an AI assistant answer questions about your Printful store — order status, what a print file actually contains, which variant maps to which artwork — without being able to spend your money.
@@ -72,15 +76,19 @@ It is opt-in rather than default because "where is this order going" is a legiti
 - **Bounded requests.** 15-second timeout, 2 MB response cap, capped backoff on HTTP 429.
 - **Small surface.** Two runtime dependencies: the MCP SDK and Zod.
 
-Found a security problem? Open an issue — or, if you'd rather not do it in public, say so in a minimal issue and I'll follow up privately.
+Found a security problem? See [SECURITY.md](./SECURITY.md) — please use private vulnerability reporting rather than a public issue.
 
 ## Development
 
 ```bash
 npm install
-npm run build
-PRINTFUL_TOKEN=... node scripts/smoke.mjs
+npm test     # build + unit tests, no token or network needed
+npm run smoke  # end-to-end against the live API, needs PRINTFUL_TOKEN
 ```
+
+`test/guards.test.mjs` covers the security guards — the path allowlist, traversal
+and absolute-URL refusal, token scrubbing and PII redaction — with no token and
+no network, so CI runs it on every push across Node 18, 20 and 22.
 
 `scripts/smoke.mjs` speaks real MCP over stdio against the live API: it checks the handshake, the tool list and annotations, a successful call, and that the guardrails actually refuse disallowed paths, traversal attempts, absolute URLs and mutually exclusive arguments.
 
