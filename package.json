@@ -1,0 +1,28 @@
+{
+  "name": "printful-mcp",
+  "version": "0.1.0",
+  "description": "Read-only Model Context Protocol server for the Printful print-on-demand API.",
+  "keywords": ["mcp", "model-context-protocol", "printful", "print-on-demand", "claude"],
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "printful-mcp": "dist/index.js"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc && chmod +x dist/index.js",
+    "prepublishOnly": "npm run build",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "typescript": "^7.0.2"
+  }
+}
